@@ -4,60 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Result Portal</title>
-
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      display: flex;
-      justify-content: center;
-      padding: 30px;
-    }
-    .container {
-      background: #fff;
-      padding: 30px;
-      width: 420px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      text-align: center;
-    }
-    input {
-      width: 90%;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 6px;
-      border: 1px solid #aaa;
-    }
-    button {
-      margin-top: 15px;
-      padding: 10px 20px;
-      border: none;
-      background: #007bff;
-      color: #fff;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    #resultBox {
-      margin-top: 25px;
-      text-align: left;
-      background: #fafafa;
-      padding: 15px;
-      border-radius: 8px;
-      display: none;
-      border: 1px solid #ddd;
-    }
-    .error {
-      color: red;
-      margin-top: 15px;
-    }
+    body { font-family: Arial; background: #f4f4f4; display: flex; justify-content: center; padding: 30px; }
+    .container { background: #fff; padding: 30px; width: 420px; border-radius: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.1); text-align: center; }
+    input { width: 90%; padding: 10px; margin-top: 10px; border-radius: 6px; border: 1px solid #aaa; }
+    button { margin-top: 15px; padding: 10px 20px; border: none; background: #007bff; color: #fff; border-radius: 6px; cursor: pointer; }
+    #resultBox { margin-top: 25px; text-align: left; background: #fafafa; padding: 15px; border-radius: 8px; display: none; border: 1px solid #ddd; }
+    .error { color: red; margin-top: 15px; }
   </style>
 </head>
 <body>
 
 <div class="container">
-
   <img src="https://drive.google.com/uc?export=view&id=1vVRhk9SJvA6GIOzBH7Q5AhFe87S0hdV7" width="120" />
-
   <h2>SIR SOLOMON'S HIGHER SECONDARY SCHOOL & COLLEGE</h2>
   <h3>Mid-Term Result 2025–2026</h3>
 
@@ -66,69 +25,55 @@
 
   <div id="errorMsg" class="error"></div>
   <div id="resultBox"></div>
-
   <p style="font-size: 13px; margin-top: 20px;">Developed by "SIR SHEHZAD"</p>
 </div>
 
 <script>
-  async function getResult() {
-    const roll = document.getElementById('roll').value.trim();
-    const errorMsg = document.getElementById('errorMsg');
-    const resultBox = document.getElementById('resultBox');
+function getResult() {
+  const roll = document.getElementById('roll').value.trim();
+  const errorMsg = document.getElementById('errorMsg');
+  const resultBox = document.getElementById('resultBox');
 
-    errorMsg.innerText = '';
-    resultBox.style.display = 'none';
+  errorMsg.innerText = '';
+  resultBox.style.display = 'none';
 
-    if (!roll) {
-      errorMsg.innerText = 'Please enter a valid roll number.';
-      return;
-    }
-
-    try {
-      // ✅ Replace with your actual Web App URL from Apps Script
-      const response = await fetch("https://script.google.com/macros/s/AKfycbzpCwfHUDKI6U2PtOaN4UNx25zFkyqD9w0_5aKtXbse9NaA_J50NbdFAjjPdlGNz6ljwA/exec?roll=" + roll);
-      const data = await response.json();
-
-      if (!data || !data.status) {
-        errorMsg.innerText = 'No data returned from server.';
-        return;
-      }
-
-      if (data.status === 'fee_due') {
-        errorMsg.innerText = 'Pay your fee first to view your result.';
-        return;
-      }
-
-      if (data.status === 'not_found') {
-        errorMsg.innerText = 'Record not found.';
-        return;
-      }
-
-      if (data.status === 'invalid_request') {
-        errorMsg.innerText = 'Invalid request.';
-        return;
-      }
-
-      // Show result
-      resultBox.style.display = 'block';
-      resultBox.innerHTML = `
-        <h3>Student Result</h3>
-        <p><strong>Name:</strong> ${data.name}</p>
-        <p><strong>Roll Number:</strong> ${data.roll}</p>
-        <p><strong>Class:</strong> ${data.class}</p>
-        <p><strong>English:</strong> ${data.english}</p>
-        <p><strong>Math:</strong> ${data.math}</p>
-        <p><strong>Science:</strong> ${data.science}</p>
-        <p><strong>Result:</strong> ${data.result}</p>
-        <br>
-        ${data.download && data.download !== 'N/A' ? `<a href="${data.download}" target="_blank">Download Full Result</a>` : ''}
-      `;
-
-    } catch (error) {
-      console.error(error);
-      errorMsg.innerText = 'Error fetching data from server.';
-    }
+  if (!roll) {
+    errorMsg.innerText = 'Please enter a valid roll number.';
+    return;
   }
+
+  // JSONP request
+  const script = document.createElement('script');
+  script.src = `https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?roll=${roll}&callback=handleResult`;
+  document.body.appendChild(script);
+}
+
+function handleResult(data) {
+  const errorMsg = document.getElementById('errorMsg');
+  const resultBox = document.getElementById('resultBox');
+
+  errorMsg.innerText = '';
+  resultBox.style.display = 'none';
+
+  if (!data || !data.status) { errorMsg.innerText = 'No data returned.'; return; }
+  if (data.status === 'fee_due') { errorMsg.innerText = 'Pay your fee first to view your result.'; return; }
+  if (data.status === 'not_found') { errorMsg.innerText = 'Record not found.'; return; }
+
+  // Show result
+  resultBox.style.display = 'block';
+  resultBox.innerHTML = `
+    <h3>Student Result</h3>
+    <p><strong>Name:</strong> ${data.name}</p>
+    <p><strong>Roll Number:</strong> ${data.roll}</p>
+    <p><strong>Class:</strong> ${data.class}</p>
+    <p><strong>English:</strong> ${data.english}</p>
+    <p><strong>Math:</strong> ${data.math}</p>
+    <p><strong>Science:</strong> ${data.science}</p>
+    <p><strong>Result:</strong> ${data.result}</p>
+    <br>
+    ${data.download && data.download !== 'N/A' ? `<a href="${data.download}" target="_blank">Download Full Result</a>` : ''}
+  `;
+}
 </script>
 
 </body>
